@@ -145,6 +145,42 @@ $something = $true
         }
 
         [Fact]
+        public void LaguageServiceFoldingSpeed() {
+            // Remove and CR characters
+            string testString = allInOneScript.Replace("\r", "");
+
+            testString = testString + "\n" + testString; // 2
+            testString = testString + "\n" + testString; // 4
+            testString = testString + "\n" + testString; // 8
+            testString = testString + "\n" + testString; // 16
+            testString = testString + "\n" + testString; // 32
+            testString = testString + "\n" + testString; // 64
+            testString = testString + "\n" + testString; // 128
+            testString = testString + "\n" + testString; // 256
+            // Ensure that there are no CR characters in the string
+            DateTime before = DateTime.Now;
+            FoldingReference[] result = GetRegions(testString);
+            DateTime after = DateTime.Now;
+            TimeSpan interval = after - before;
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("Before: " + before.ToLongTimeString());
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("After: " + after.ToLongTimeString());
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("Regions: " + result.Length);
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("Diff: " + interval.TotalMilliseconds);
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
+            throw new Exception("Wee!");
+            Assert.True(true);
+        }
+
+        [Fact]
         public void LaguageServiceFindsFoldablRegionsWithLF() {
             // Remove and CR characters
             string testString = allInOneScript.Replace("\r", "");
