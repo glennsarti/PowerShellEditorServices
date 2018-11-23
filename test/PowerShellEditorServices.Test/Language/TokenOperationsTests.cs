@@ -19,7 +19,25 @@ namespace Microsoft.PowerShell.EditorServices.Test.Language
                 "clienttestfile",
                 text,
                 Version.Parse("5.0"));
-            return Microsoft.PowerShell.EditorServices.TokenOperations.FoldableRegions(scriptFile.ScriptTokens, showLastLine);
+
+            DateTime before = DateTime.Now;
+            var foldResult = Microsoft.PowerShell.EditorServices.TokenOperations.FoldableRegions(scriptFile.ScriptTokens, showLastLine);
+            DateTime after = DateTime.Now;
+            TimeSpan interval = after - before;
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("FOLDABLEREGIONS Before: " + before.ToLongTimeString());
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("FOLDABLEREGIONS After: " + after.ToLongTimeString());
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("FOLDABLEREGIONS Diff: " + interval.TotalMilliseconds);
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
+
+            return foldResult;
         }
 
         /// <summary>
@@ -165,93 +183,92 @@ $something = $true
             System.Console.ForegroundColor = ConsoleColor.White;
             System.Console.WriteLine("**************");
             System.Console.ForegroundColor = ConsoleColor.White;
-            System.Console.WriteLine("Before: " + before.ToLongTimeString());
+            System.Console.WriteLine("GETREGIONS Before: " + before.ToLongTimeString());
             System.Console.ForegroundColor = ConsoleColor.White;
-            System.Console.WriteLine("After: " + after.ToLongTimeString());
-            System.Console.ForegroundColor = ConsoleColor.White;
-            System.Console.WriteLine("**************");
-            System.Console.ForegroundColor = ConsoleColor.White;
-            System.Console.WriteLine("Regions: " + result.Length);
-            System.Console.ForegroundColor = ConsoleColor.White;
-            System.Console.WriteLine("Diff: " + interval.TotalMilliseconds);
+            System.Console.WriteLine("GETREGIONS After: " + after.ToLongTimeString());
             System.Console.ForegroundColor = ConsoleColor.White;
             System.Console.WriteLine("**************");
-            throw new Exception("Wee!");
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("GETREGIONS Regions: " + result.Length);
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("GETREGIONS Diff: " + interval.TotalMilliseconds);
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.WriteLine("**************");
             Assert.True(true);
         }
 
-        [Fact]
-        public void LaguageServiceFindsFoldablRegionsWithLF() {
-            // Remove and CR characters
-            string testString = allInOneScript.Replace("\r", "");
-            // Ensure that there are no CR characters in the string
-            Assert.True(testString.IndexOf("\r\n") == -1, "CRLF should not be present in the test string");
-            FoldingReference[] result = GetRegions(testString);
-            AssertFoldingReferenceArrays(expectedAllInOneScriptFolds, result);
-        }
+//         [Fact]
+//         public void LaguageServiceFindsFoldablRegionsWithLF() {
+//             // Remove and CR characters
+//             string testString = allInOneScript.Replace("\r", "");
+//             // Ensure that there are no CR characters in the string
+//             Assert.True(testString.IndexOf("\r\n") == -1, "CRLF should not be present in the test string");
+//             FoldingReference[] result = GetRegions(testString);
+//             AssertFoldingReferenceArrays(expectedAllInOneScriptFolds, result);
+//         }
 
-        [Fact]
-        public void LaguageServiceFindsFoldablRegionsWithCRLF() {
-            // The Foldable regions should be the same regardless of line ending type
-            // Enforce CRLF line endings, if none exist
-            string testString = allInOneScript;
-            if (testString.IndexOf("\r\n") == -1) {
-                testString = testString.Replace("\n", "\r\n");
-            }
-            // Ensure that there are CRLF characters in the string
-            Assert.True(testString.IndexOf("\r\n") != -1, "CRLF should be present in the teststring");
-            FoldingReference[] result = GetRegions(testString);
-            AssertFoldingReferenceArrays(expectedAllInOneScriptFolds, result);
-        }
+//         [Fact]
+//         public void LaguageServiceFindsFoldablRegionsWithCRLF() {
+//             // The Foldable regions should be the same regardless of line ending type
+//             // Enforce CRLF line endings, if none exist
+//             string testString = allInOneScript;
+//             if (testString.IndexOf("\r\n") == -1) {
+//                 testString = testString.Replace("\n", "\r\n");
+//             }
+//             // Ensure that there are CRLF characters in the string
+//             Assert.True(testString.IndexOf("\r\n") != -1, "CRLF should be present in the teststring");
+//             FoldingReference[] result = GetRegions(testString);
+//             AssertFoldingReferenceArrays(expectedAllInOneScriptFolds, result);
+//         }
 
-        [Fact]
-        public void LaguageServiceFindsFoldablRegionsWithoutLastLine() {
-            FoldingReference[] result = GetRegions(allInOneScript, false);
-            // Incrememnt the end line of the expected regions by one as we will
-            // be hiding the last line
-            FoldingReference[] expectedFolds = expectedAllInOneScriptFolds.Clone() as FoldingReference[];
-            for (int index = 0; index < expectedFolds.Length; index++)
-            {
-                expectedFolds[index].EndLine++;
-            }
-            AssertFoldingReferenceArrays(expectedFolds, result);
-        }
+//         [Fact]
+//         public void LaguageServiceFindsFoldablRegionsWithoutLastLine() {
+//             FoldingReference[] result = GetRegions(allInOneScript, false);
+//             // Incrememnt the end line of the expected regions by one as we will
+//             // be hiding the last line
+//             FoldingReference[] expectedFolds = expectedAllInOneScriptFolds.Clone() as FoldingReference[];
+//             for (int index = 0; index < expectedFolds.Length; index++)
+//             {
+//                 expectedFolds[index].EndLine++;
+//             }
+//             AssertFoldingReferenceArrays(expectedFolds, result);
+//         }
 
-        [Fact]
-        public void LaguageServiceFindsFoldablRegionsWithMismatchedRegions() {
-            string testString =
-@"#endregion should not fold - mismatched
+//         [Fact]
+//         public void LaguageServiceFindsFoldablRegionsWithMismatchedRegions() {
+//             string testString =
+// @"#endregion should not fold - mismatched
 
-#region This should fold
-$something = 'foldable'
-#endregion
+// #region This should fold
+// $something = 'foldable'
+// #endregion
 
-#region should not fold - mismatched
-";
-            FoldingReference[] expectedFolds = {
-                CreateFoldingReference(2, 0, 3, 10, "region")
-            };
+// #region should not fold - mismatched
+// ";
+//             FoldingReference[] expectedFolds = {
+//                 CreateFoldingReference(2, 0, 3, 10, "region")
+//             };
 
-            FoldingReference[] result = GetRegions(testString);
-            AssertFoldingReferenceArrays(expectedFolds, result);
-        }
+//             FoldingReference[] result = GetRegions(testString);
+//             AssertFoldingReferenceArrays(expectedFolds, result);
+//         }
 
-        [Fact]
-        public void LaguageServiceFindsFoldablRegionsWithDuplicateRegions() {
-            string testString =
-@"# This script causes duplicate/overlapping ranges due to the `(` and `{` characters
-$AnArray = @(Get-ChildItem -Path C:\ -Include *.ps1 -File).Where({
-    $_.FullName -ne 'foo'}).ForEach({
-        # Do Something
-})
-";
-            FoldingReference[] expectedFolds = {
-                CreateFoldingReference(1, 64, 1, 27, null),
-                CreateFoldingReference(2, 35, 3,  2, null)
-            };
+//         [Fact]
+//         public void LaguageServiceFindsFoldablRegionsWithDuplicateRegions() {
+//             string testString =
+// @"# This script causes duplicate/overlapping ranges due to the `(` and `{` characters
+// $AnArray = @(Get-ChildItem -Path C:\ -Include *.ps1 -File).Where({
+//     $_.FullName -ne 'foo'}).ForEach({
+//         # Do Something
+// })
+// ";
+//             FoldingReference[] expectedFolds = {
+//                 CreateFoldingReference(1, 64, 1, 27, null),
+//                 CreateFoldingReference(2, 35, 3,  2, null)
+//             };
 
-            FoldingReference[] result = GetRegions(testString);
-            AssertFoldingReferenceArrays(expectedFolds, result);
-        }
+//             FoldingReference[] result = GetRegions(testString);
+//             AssertFoldingReferenceArrays(expectedFolds, result);
+//         }
     }
 }

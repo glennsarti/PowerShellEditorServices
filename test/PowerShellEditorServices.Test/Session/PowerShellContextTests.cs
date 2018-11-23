@@ -53,107 +53,107 @@ namespace Microsoft.PowerShell.EditorServices.Test.Console
             this.powerShellContext = null;
         }
 
-        [Fact]
-        public async Task CanExecutePSCommand()
-        {
-            PSCommand psCommand = new PSCommand();
-            psCommand.AddScript("$a = \"foo\"; $a");
+        // [Fact]
+        // public async Task CanExecutePSCommand()
+        // {
+        //     PSCommand psCommand = new PSCommand();
+        //     psCommand.AddScript("$a = \"foo\"; $a");
 
-            var executeTask =
-                this.powerShellContext.ExecuteCommand<string>(psCommand);
+        //     var executeTask =
+        //         this.powerShellContext.ExecuteCommand<string>(psCommand);
 
-            await this.AssertStateChange(PowerShellContextState.Running);
-            await this.AssertStateChange(PowerShellContextState.Ready);
+        //     await this.AssertStateChange(PowerShellContextState.Running);
+        //     await this.AssertStateChange(PowerShellContextState.Ready);
 
-            var result = await executeTask;
-            Assert.Equal("foo", result.First());
-        }
+        //     var result = await executeTask;
+        //     Assert.Equal("foo", result.First());
+        // }
 
-        [Fact]
-        public async Task CanQueueParallelRunspaceRequests()
-        {
-            // Concurrently initiate 4 requests in the session
-            Task taskOne = this.powerShellContext.ExecuteScriptString("$x = 100");
-            Task<RunspaceHandle> handleTask = this.powerShellContext.GetRunspaceHandle();
-            Task taskTwo = this.powerShellContext.ExecuteScriptString("$x += 200");
-            Task taskThree = this.powerShellContext.ExecuteScriptString("$x = $x / 100");
+        // [Fact]
+        // public async Task CanQueueParallelRunspaceRequests()
+        // {
+        //     // Concurrently initiate 4 requests in the session
+        //     Task taskOne = this.powerShellContext.ExecuteScriptString("$x = 100");
+        //     Task<RunspaceHandle> handleTask = this.powerShellContext.GetRunspaceHandle();
+        //     Task taskTwo = this.powerShellContext.ExecuteScriptString("$x += 200");
+        //     Task taskThree = this.powerShellContext.ExecuteScriptString("$x = $x / 100");
 
-            PSCommand psCommand = new PSCommand();
-            psCommand.AddScript("$x");
-            Task<IEnumerable<int>> resultTask = this.powerShellContext.ExecuteCommand<int>(psCommand);
+        //     PSCommand psCommand = new PSCommand();
+        //     psCommand.AddScript("$x");
+        //     Task<IEnumerable<int>> resultTask = this.powerShellContext.ExecuteCommand<int>(psCommand);
 
-            // Wait for the requested runspace handle and then dispose it
-            RunspaceHandle handle = await handleTask;
-            handle.Dispose();
+        //     // Wait for the requested runspace handle and then dispose it
+        //     RunspaceHandle handle = await handleTask;
+        //     handle.Dispose();
 
-            // Wait for all of the executes to complete
-            await Task.WhenAll(taskOne, taskTwo, taskThree, resultTask);
+        //     // Wait for all of the executes to complete
+        //     await Task.WhenAll(taskOne, taskTwo, taskThree, resultTask);
 
-            // At this point, the remaining command executions should execute and complete
-            int result = resultTask.Result.FirstOrDefault();
+        //     // At this point, the remaining command executions should execute and complete
+        //     int result = resultTask.Result.FirstOrDefault();
 
-            // 100 + 200 = 300, then divided by 100 is 3.  We are ensuring that
-            // the commands were executed in the sequence they were called.
-            Assert.Equal(3, result);
-        }
+        //     // 100 + 200 = 300, then divided by 100 is 3.  We are ensuring that
+        //     // the commands were executed in the sequence they were called.
+        //     Assert.Equal(3, result);
+        // }
 
-        [Fact]
-        public async Task CanAbortExecution()
-        {
-            var executeTask =
-                Task.Run(
-                    async () =>
-                    {
-                        var unusedTask = this.powerShellContext.ExecuteScriptWithArgs(DebugTestFilePath);
-                        await Task.Delay(50);
-                        this.powerShellContext.AbortExecution();
-                    });
+        // [Fact]
+        // public async Task CanAbortExecution()
+        // {
+        //     var executeTask =
+        //         Task.Run(
+        //             async () =>
+        //             {
+        //                 var unusedTask = this.powerShellContext.ExecuteScriptWithArgs(DebugTestFilePath);
+        //                 await Task.Delay(50);
+        //                 this.powerShellContext.AbortExecution();
+        //             });
 
-            await this.AssertStateChange(PowerShellContextState.Running);
-            await this.AssertStateChange(PowerShellContextState.Aborting);
-            await this.AssertStateChange(PowerShellContextState.Ready);
+        //     await this.AssertStateChange(PowerShellContextState.Running);
+        //     await this.AssertStateChange(PowerShellContextState.Aborting);
+        //     await this.AssertStateChange(PowerShellContextState.Ready);
 
-            await executeTask;
-        }
+        //     await executeTask;
+        // }
 
-        [Fact]
-        public async Task CanResolveAndLoadProfilesForHostId()
-        {
-            string[] expectedProfilePaths =
-                new string[]
-                {
-                    TestProfilePaths.AllUsersAllHosts,
-                    TestProfilePaths.AllUsersCurrentHost,
-                    TestProfilePaths.CurrentUserAllHosts,
-                    TestProfilePaths.CurrentUserCurrentHost
-                };
+        // [Fact]
+        // public async Task CanResolveAndLoadProfilesForHostId()
+        // {
+        //     string[] expectedProfilePaths =
+        //         new string[]
+        //         {
+        //             TestProfilePaths.AllUsersAllHosts,
+        //             TestProfilePaths.AllUsersCurrentHost,
+        //             TestProfilePaths.CurrentUserAllHosts,
+        //             TestProfilePaths.CurrentUserCurrentHost
+        //         };
 
-            // Load the profiles for the test host name
-            await this.powerShellContext.LoadHostProfiles();
+        //     // Load the profiles for the test host name
+        //     await this.powerShellContext.LoadHostProfiles();
 
-            // Ensure that all the paths are set in the correct variables
-            // and that the current user's host profile got loaded
-            PSCommand psCommand = new PSCommand();
-            psCommand.AddScript(
-                "\"$($profile.AllUsersAllHosts) " +
-                "$($profile.AllUsersCurrentHost) " +
-                "$($profile.CurrentUserAllHosts) " +
-                "$($profile.CurrentUserCurrentHost) " +
-                "$(Assert-ProfileLoaded)\"");
+        //     // Ensure that all the paths are set in the correct variables
+        //     // and that the current user's host profile got loaded
+        //     PSCommand psCommand = new PSCommand();
+        //     psCommand.AddScript(
+        //         "\"$($profile.AllUsersAllHosts) " +
+        //         "$($profile.AllUsersCurrentHost) " +
+        //         "$($profile.CurrentUserAllHosts) " +
+        //         "$($profile.CurrentUserCurrentHost) " +
+        //         "$(Assert-ProfileLoaded)\"");
 
-            var result =
-                await this.powerShellContext.ExecuteCommand<string>(
-                    psCommand);
+        //     var result =
+        //         await this.powerShellContext.ExecuteCommand<string>(
+        //             psCommand);
 
-            string expectedString =
-                string.Format(
-                    "{0} True",
-                    string.Join(
-                        " ",
-                        expectedProfilePaths));
+        //     string expectedString =
+        //         string.Format(
+        //             "{0} True",
+        //             string.Join(
+        //                 " ",
+        //                 expectedProfilePaths));
 
-            Assert.Equal(expectedString, result.FirstOrDefault(), true);
-        }
+        //     Assert.Equal(expectedString, result.FirstOrDefault(), true);
+        // }
 
         #region Helper Methods
 
