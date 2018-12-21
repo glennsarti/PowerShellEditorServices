@@ -1335,7 +1335,10 @@ function __Expand-Alias {
             FoldingRangeParams foldingParams,
             IRequestContext<FoldingRange[]> requestContext)
         {
-            await requestContext.SendResult(Fold(foldingParams.TextDocument.Uri));
+            await requestContext.SendResult(Fold(
+                foldingParams.TextDocument.Uri,
+                this.currentSettings.CodeFolding.ShowLastLine
+            ));
         }
 
         protected Task HandleEvaluateRequest(
@@ -1377,7 +1380,8 @@ function __Expand-Alias {
         #region Event Handlers
 
         private FoldingRange[] Fold(
-            string documentUri)
+            string documentUri,
+            bool showLastLine)
         {
             // TODO Should be using dynamic registrations
             if (!this.currentSettings.CodeFolding.Enable) { return null; }
@@ -1386,7 +1390,7 @@ function __Expand-Alias {
             ScriptFile script = editorSession.Workspace.GetFile(documentUri);
 
             // If we're showing the last line, decrement the Endline of all regions by one.
-            int endLineOffset = this.currentSettings.CodeFolding.ShowLastLine ? -1 : 0;
+            int endLineOffset = showLastLine ? -1 : 0;
 
             foreach (KeyValuePair<int, FoldingReference> entry in TokenOperations.FoldableRegions(script.ScriptTokens))
             {
