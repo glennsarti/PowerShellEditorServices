@@ -8,7 +8,16 @@ using System.Threading.Tasks;
 
 namespace Microsoft.PowerShell.EditorServices.Protocol.MessageProtocol
 {
-    public class RequestContext<TResult>
+    public interface IRequestContext<TResult>
+    {
+        Task SendResult(TResult resultDetails);
+
+        Task SendEvent<TParams, TRegistrationOptions>(NotificationType<TParams, TRegistrationOptions> eventType, TParams eventParams);
+
+        Task SendError(object errorDetails);
+    }
+
+    public class RequestContext<TResult>: IRequestContext<TResult>
     {
         private Message requestMessage;
         private MessageWriter messageWriter;

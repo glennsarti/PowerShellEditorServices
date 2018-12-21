@@ -44,7 +44,7 @@ namespace Microsoft.PowerShell.EditorServices.Protocol.Server
         private ILogger Logger;
         private bool profilesLoaded;
         private bool consoleReplStarted;
-        private EditorSession editorSession;
+        internal EditorSession editorSession;
         private IMessageSender messageSender;
         private IMessageHandlers messageHandlers;
         private LanguageServerEditorOperations editorOperations;
@@ -1333,7 +1333,7 @@ function __Expand-Alias {
 
         protected async Task HandleFoldingRangeRequestAsync(
             FoldingRangeParams foldingParams,
-            RequestContext<FoldingRange[]> requestContext)
+            IRequestContext<FoldingRange[]> requestContext)
         {
             await requestContext.SendResult(Fold(foldingParams.TextDocument.Uri));
         }
